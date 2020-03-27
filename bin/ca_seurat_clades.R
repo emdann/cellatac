@@ -29,6 +29,14 @@ so <- CreateSeuratObject(
   meta.data = metadata
 )
 
+### Filter low quality cells (ed6)
+# as suggested in SnapATAC and Signac QC pipeline, I filter out cells with extreme ratio of fragments in TSS
+# (remove top and bottom 5% of cells)
+tss_ratio <- win500k_seurat$TSS_fragments / win500k_seurat$passed_filters 
+tss_percent <- base::rank(tss_ratio)/length(tss_ratio)
+keep_cells <- names(tss_ratio)[tss_percent > 0.05 & tss_percent < 0.95]
+so <- so[,keep_cells]
+
 ### Normalization -  term frequency-inverse document frequency (TF-IDF) 
 # is a two-step normalization procedure, 
 # that both normalizes across cells to correct for differences in cellular sequencing depth, 
